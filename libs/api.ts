@@ -34,7 +34,7 @@ interface PaymentData {
 }
 
 const api: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://native-admin-dashboard-backend.onrender.com',
   headers: {
     'Content-Type': 'application/json',
   },
