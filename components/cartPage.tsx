@@ -267,6 +267,7 @@ const Cart: React.FC<CartProps> = ({
         cartItems={cartItems}
         totalAmount={getTotalPrice()}
         onPaymentSuccess={handlePaymentSuccess}
+        onBackToCategory={() => setIsCheckoutModalOpen(false)}
       />
     </>
   );
