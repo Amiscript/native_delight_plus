@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Plus, Star, Grid, List } from 'lucide-react';
+import { Plus, Grid, List } from 'lucide-react';
 
 interface MenuItem {
   _id: string;
@@ -44,17 +44,17 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
                                   
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             
-            {/* Price Badge */}
+        
             <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
               <span className="font-bold">₦{item.price.toLocaleString()}</span>
             </div>
             
-            {/* Stock Status Badge */}
+          
             <div className="absolute top-4 left-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm text-xs font-bold">
               {item.stock}
             </div>
             
-            {/* Quick Add Button */}
+           
             <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
               <button
                 onClick={() => addToCart(item)}
@@ -71,12 +71,7 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
                 {item.name}
               </h3>
               <div className="flex items-center space-x-2 mb-2">
-                <div className="flex items-center space-x-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={14} className="text-amber-400 fill-current" />
-                  ))}
-                </div>
-                <span className="text-gray-500 text-sm">(4.8)</span>
+              
               </div>
             </div>
             
@@ -130,7 +125,7 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
                     className="object-cover"
                     unoptimized
                   />
-                  {/* Status badge positioned at top-right of image */}
+                 
                   <span className={`absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
                     item.status === 'active' 
                       ? 'bg-green-100 text-green-700' 
@@ -142,7 +137,7 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
               ) : (
                 <div className="relative w-16 h-16 md:w-20 md:h-20 bg-amber-100 rounded-lg flex items-center justify-center">
                   <span className="text-amber-600 text-xl">🍽️</span>
-                  {/* Status badge positioned at top-right of placeholder */}
+              
                   <span className={`absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
                     item.status === 'active' 
                       ? 'bg-green-100 text-green-700' 
@@ -157,24 +152,18 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
               <div>
                 <h4 className="font-bold text-gray-800 text-base md:text-lg mb-1 line-clamp-2">{item.name}</h4>
                 <p className="text-gray-600 text-xs md:text-sm mb-1 line-clamp-2">{item.description}</p>
-                {/* <div className="flex items-center space-x-1 mb-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={12} className="text-amber-400 fill-current" />
-                  ))}
-                  <span className="text-gray-500 text-xs">(4.8)</span>
-                </div> */}
+                
                 <p className="text-xs text-gray-500">
                   {item.subCategory?.name || 'No subcategory'}
                 </p>
               </div>
-              {/* Price moved to right side */}
+           
               <div className="flex justify-end mt-2">
                 <p className="text-amber-600 font-bold text-base md:text-lg">₦{item.price.toLocaleString()}</p>
               </div>
             </div>
           </div>
           
-          {/* Stock status and add to cart button */}
           <div className="flex items-center justify-between mt-auto">
             <span className="text-xs px-2 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full font-medium">
               {item.stock}
@@ -226,8 +215,6 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
           </button>
         </div>
       </div>
-
-      {/* Render the selected view */}
       {viewMode === 'card' ? <ModalView /> : <CardView />}
     </div>
   );
