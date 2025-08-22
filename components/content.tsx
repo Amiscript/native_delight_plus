@@ -1,17 +1,49 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { getCategories, getMenuItems } from '@/libs/api';
+import { getCategories, getMenuItems } from '../libs/api';
 import Menu from './menu';
 import Cart from './cartPage';
+import CategoryGrid from './CategoryGrid';
+import CategoryModal from './CategoryModal';
+import SubcategoryHeader from './SubcategoryHeader';
+import Carousel from '../components/Carousel';
+
+// API Response Interfaces
+interface MenuItemsResponse {
+  success: boolean;
+  products: MenuItem[];
+  summary?: {
+    totalProducts: number;
+    totalActive: number;
+    totalInStock: number;
+    totalOutOfStock: number;
+  };
+}
+
+interface CategoriesResponse {
+  success: boolean;
+  categories: Category[];
+  totalCategories?: number;
+  totalActiveCategories?: number;
+  mostOrderedCategory?: any;
+}
 
 interface MenuItem {
   _id: string;
   name: string;
   description: string;
   price: number;
-   category: {name: string, subcategory: string}; // This should match category._id
+  category: {
+    _id: string;
+    name: string;
+  };
+  subCategory: { 
+    _id: string;
+    name: string;
+  };
+  status: string;
+  stock: string;
   image: string;
 }
 
@@ -24,18 +56,26 @@ interface Subcategory {
   _id: string;
 }
 
+interface CategoryImage {
+  url: string;
+}
+
 interface Category {
   _id: string;
   name: string;
   description: string;
   status: string;
-  image: string;
+  image: CategoryImage | null;
   subcategoryCount: number;
   subcategories: Subcategory[];
 }
 
 const Foodmenu: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('');
+  const [activeSubcategory, setActiveSubcategory] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState<boolean>(false);
+  const [viewMode, setViewMode] = useState<'categories' | 'subcategory'>('categories');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [orderPlaced, setOrderPlaced] = useState<boolean>(false);
@@ -49,18 +89,70 @@ const Foodmenu: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [items, fetchedCategories] = await Promise.all([
+        const [itemsResponse, categoriesResponse] = await Promise.all([ 
           getMenuItems(),
           getCategories(),
         ]);
-        console.log("category", fetchedCategories);
-        console.log("items", items);
-        setMenuItems(items);
-        setCategories(fetchedCategories);
-        // Set the first category as active if available
-        if (fetchedCategories.length > 0) {
-          setActiveCategory(fetchedCategories[0]._id);
+        
+        console.log("categories response", categoriesResponse);
+        console.log("items response", itemsResponse); 
+        
+      
+        let menuItemsData: MenuItem[] = [];
+
+        if (Array.isArray(itemsResponse)) {
+          
+          menuItemsData = (itemsResponse as any[]).map((item: any) => ({
+            _id: item._id,
+            name: item.name,
+            description: item.description,
+            price: item.price,
+            category: item.category,
+            subCategory: item.subCategory,
+            status: item.status,
+            stock: item.stock,
+            image: item.image,
+          }));
+        } else if (itemsResponse && typeof itemsResponse === 'object' && 'success' in itemsResponse) {
+          menuItemsData = (itemsResponse as MenuItemsResponse).success
+            ? (itemsResponse as MenuItemsResponse).products.map((item: any) => ({
+                _id: item._id,
+                name: item.name,
+                description: item.description,
+                price: item.price,
+                category: item.category,
+                subCategory: item.subCategory,
+                status: item.status,
+                stock: item.stock,
+                image: item.image,
+              }))
+            : [];
         }
+        
+      
+        let categoriesData: Category[] = [];
+        
+        if (Array.isArray(categoriesResponse)) {
+        
+          categoriesData = categoriesResponse.map((cat: any) => ({
+            ...cat,
+            image: typeof cat.image === 'string'
+              ? { url: cat.image }
+              : cat.image || null,
+          }));
+        } else if (categoriesResponse && typeof categoriesResponse === 'object' && 'success' in categoriesResponse) {
+          categoriesData = (categoriesResponse as CategoriesResponse).success 
+            ? (categoriesResponse as CategoriesResponse).categories.map((cat: any) => ({
+                ...cat,
+                image: typeof cat.image === 'string'
+                  ? { url: cat.image }
+                  : cat.image || null,
+              }))
+            : [];
+        }
+        
+        setMenuItems(menuItemsData);
+        setCategories(categoriesData);
         setLoading(false);
       } catch (err) {
         setError('Failed to load menu or categories. Please try again later.');
@@ -72,9 +164,14 @@ const Foodmenu: React.FC = () => {
     fetchData();
   }, []);
 
-  const filteredItems = menuItems.filter(item => item.category.name === activeCategory);
+  const filteredItems = menuItems.filter(item => {
+    if (viewMode === 'subcategory' && activeSubcategory) {
+      return item.category.name === activeCategory && item.subCategory.name === activeSubcategory; 
+    }
+    return item.category.name === activeCategory;
+  });
 
-    useEffect(() => {
+  useEffect(() => {
     if (cartItems.length === 0) {  
       setIsCartOpen(false);
     }
@@ -95,10 +192,26 @@ const Foodmenu: React.FC = () => {
     });
   };
 
+  const handleCategoryClick = (category: Category) => {
+    setSelectedCategory(category);
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleSubcategorySelect = (categoryName: string, subcategoryName: string) => {
+    setActiveCategory(categoryName);
+    setActiveSubcategory(subcategoryName);
+    setViewMode('subcategory');
+  };
+
+  const handleBackToCategories = () => {
+    setViewMode('categories');
+    setActiveCategory('');
+    setActiveSubcategory('');
+  };
+
   const getTotalItems = () => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
   };
-
 
   useEffect(() => {
     if (getTotalItems() === 0) {
@@ -107,6 +220,7 @@ const Foodmenu: React.FC = () => {
   }, [cartItems]);
 
   // Carousel effect
+  const totalItems = getTotalItems();
   useEffect(() => {
     const slides = document.querySelectorAll('.carousel-slide');
     if (slides.length === 0) return;
@@ -121,12 +235,12 @@ const Foodmenu: React.FC = () => {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [currentSlide, getTotalItems()]);
+  }, [currentSlide, totalItems]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white shadow-md">
+      <header className="sticky top-0 z-40 bg-white shadow-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center">
             <i className="fas fa-utensils text-amber-600 text-2xl mr-2"></i>
@@ -146,152 +260,66 @@ const Foodmenu: React.FC = () => {
           </button>
         </div>
       </header>
+
       <main className="container mx-auto px-4 py-8">
-        {/* Hero Section with Carousel Background */}
-        <div className="relative mb-12 overflow-hidden rounded-xl">
-          <div className="absolute inset-0 z-0">
-            <div id="carousel" className="h-full w-full">
-              <div className="carousel-slide absolute inset-0 opacity-0 transition-opacity duration-1000 ease-in-out bg-cover bg-center" style={{ backgroundImage: `url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrGkAsIl8xvNcvOsxIX6ng2n7fj0YrGOKtG892Z5QNgoH6pkJWv-exNfuCuDKeLE5TcyQ&usqp=CAU')` }}></div>
-              <div className="carousel-slide absolute inset-0 opacity-0 transition-opacity duration-1000 ease-in-out bg-cover bg-center" style={{ backgroundImage: `url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdc1_OyBTVQr0gAcF0MCkZJJSymozliOg2pA0COd56g0N4rf_Ho5-NlJuiDIEbwaG6l8k&usqp=CAU')` }}></div>
-              <div className="carousel-slide absolute inset-0 opacity-0 transition-opacity duration-1000 ease-in-out bg-cover bg-center" style={{ backgroundImage: `url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrGkAsIl8xvNcvOsxIX6ng2n7fj0YrGOKtG892Z5QNgoH6pkJWv-exNfuCuDKeLE5TcyQ&usqp=CAU')` }}></div>
-            </div>
-          </div>
-          <div className="relative z-10 py-20 px-6 bg-black bg-opacity-50 text-center">
-            <h2 className="text-4xl font-bold text-white mb-4">Our Menu</h2>
-            <p className="text-gray-100 max-w-2xl mx-auto">
-              Discover our carefully crafted dishes made with the finest ingredients.
-              From appetizers to desserts, every bite tells a story of passion and flavor.
-            </p>
-          </div>
-        </div>
-
-        
-        {/* Categories */}
-        <div className="mb-8 overflow-x-auto pb-2">
-          <div className="flex space-x-2 min-w-max">
-            {categories.map(category => (
-              <button
-                key={category._id}
-                onClick={() => setActiveCategory(category.name)}
-                className={`!rounded-button whitespace-nowrap px-6 py-2 rounded-full font-medium cursor-pointer transition-colors ${
-                  activeCategory === category.name
-                    ? 'bg-amber-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Menu Items */}
-        {loading ? (
-          <div className="text-center py-8">
-            <p className="text-gray-600">Loading menu items...</p>
-          </div>
-        ) : error ? (
-          <div className="text-center py-8">
-            <p className="text-red-500">{error}</p>
-          </div>
+        {viewMode === 'categories' ? (
+          <>
+            {/* Hero Section with Carousel Background */}
+            
+            <Carousel/>
+              
+            {/* Loading and Error States */}
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto "></div>
+                <p className="text-gray-600">Loading categories...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+                  <p className="text-red-600">{error}</p>
+                </div>
+              </div>
+            ) : (
+              <CategoryGrid
+                categories={categories}
+                onCategoryClick={handleCategoryClick}
+                activeCategory={activeCategory}
+              />
+            )}
+          </>
         ) : (
-          <Menu filteredItems={filteredItems} addToCart={addToCart} />
+          <>
+            {/* Subcategory View */}
+            <SubcategoryHeader
+              categoryName={activeCategory}
+              subcategoryName={activeSubcategory}
+              itemCount={filteredItems.length}
+              onBack={handleBackToCategories}
+            />
+
+            {/* Menu Items for Subcategory */}
+            {filteredItems.length > 0 ? (
+              <Menu filteredItems={filteredItems} addToCart={addToCart} />
+            ) : (
+              <div className="text-center py-12">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md mx-auto">
+                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-gray-400 text-2xl">🍽️</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">No Items Found</h3>
+                  <p className="text-gray-600">
+                    No menu items available in this subcategory at the moment.
+                  </p>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </main>
 
-
-      {/* Cart Sidebar */}
-      {/* <div className={`fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity ${isCartOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <div className={`absolute right-0 top-0 h-full bg-white w-full max-w-md transform transition-transform ${isCartOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto`}>
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">Your Cart</h2>
-              <button
-                onClick={() => setIsCartOpen(false)}
-                className="text-gray-500 hover:text-gray-700 cursor-pointer"
-              >
-                <i className="fas fa-times text-xl"></i>
-              </button>
-            </div>
-            {cartItems.length === 0 ? (
-              <div className="text-center py-8">
-                <i className="fas fa-shopping-cart text-gray-300 text-5xl mb-4"></i>
-                <p className="text-gray-500">Your cart is empty</p>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-4 mb-6">
-                  {cartItems.map(item => (
-                    <div key={item._id} className="flex items-center border-b border-gray-200 pb-4">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        width={80}
-                        height={80}
-                        className="w-20 h-20 object-cover rounded-lg mr-4"
-                      />
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-800">{item.name}</h3>
-                        <p className="text-gray-600 text-sm">N{item.price.toFixed(2)}</p>
-                        <div className="flex items-center mt-2">
-                          <button
-                            onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                            className="!rounded-button whitespace-nowrap text-gray-500 hover:text-gray-700 cursor-pointer"
-                          >
-                            <i className="fas fa-minus"></i>
-                          </button>
-                          <span className="mx-3">{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                            className="!rounded-button whitespace-nowrap text-gray-500 hover:text-gray-700 cursor-pointer"
-                          >
-                            <i className="fas fa-plus"></i>
-                          </button>
-                        </div>
-                      </div>
-                      <span className="font-medium">N{(item.price * item.quantity).toFixed(2)}</span>
-                      <button
-                        onClick={() => removeFromCart(item._id)}
-                        className="!rounded-button whitespace-nowrap ml-4 text-red-500 hover:text-red-700 cursor-pointer"
-                      >
-                        <i className="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <div className="border-t border-gray-200 pt-4 space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span>N{getTotalPrice().toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-lg pt-2">
-                    <span>Total</span>
-                    <span>N{(getTotalPrice()).toFixed(2)}</span>
-                  </div>
-                </div>
-                <button
-                  onClick={placeOrder}
-                  className={`!rounded-button whitespace-nowrap w-full mt-6 py-3 rounded-lg font-medium text-white cursor-pointer ${
-                    orderPlaced ? 'bg-green-600' : 'bg-amber-600 hover:bg-amber-700'
-                  } transition-colors`}
-                  disabled={orderPlaced}
-                >
-                  {orderPlaced ? (
-                    <div className="flex items-center justify-center">
-                      <i className="fas fa-check mr-2"></i>
-                      Order Placed!
-                    </div>
-                  ) : (
-                    'Place Order'
-                  )}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div> */}
-
-         <Cart
+      {/* Cart Component */}
+      <Cart
         cartItems={cartItems}
         setCartItems={setCartItems}
         isCartOpen={isCartOpen}
@@ -300,6 +328,13 @@ const Foodmenu: React.FC = () => {
         setOrderPlaced={setOrderPlaced}
       />
 
+      {/* Category Modal */}
+      <CategoryModal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        category={selectedCategory}
+        onSubcategorySelect={handleSubcategorySelect}
+      />
 
       {/* Footer */}
       <footer className="bg-gray-800 text-white py-8 mt-16">
@@ -317,22 +352,21 @@ const Foodmenu: React.FC = () => {
                 <li>Monday - Friday: 11am - 10pm</li>
                 <li>Saturday: 10am - 11pm</li>
                 <li>Sunday: 10am - 9pm</li>
-              </ul>
+            </ul>
             </div>
             <div>
               <h3 className="text-xl font-bold mb-4">Contact</h3>
               <ul className="text-gray-300">
-                <li className="flex items-center mb-2">
-                  <i className="fas fa-map-marker-alt mr-2"></i>
-                  {/* 123 Gourmet Street, Foodville */}
-                </li>
+               <li> Lagos <a rel="ugc" href="https://www.google.com/maps/search/?api=1&query=Native+Delight,+John+Great+Court,+1+Femi+Bamgbelu+Street,+10+Alternative+Rte,+Chevron+Dr,+opposite+Cromwell+Estate,+Eti-Osa,+Lagos+105102,+Lagos" target="_blank">
+            </a></li>
+                
                 <li className="flex items-center mb-2">
                   <i className="fas fa-phone mr-2"></i>
-                  {/* (555) 123-4567 */}
+                 +234 814 280 9371
                 </li>
                 <li className="flex items-center">
                   <i className="fas fa-envelope mr-2"></i>
-                  {/* info@gourmethaven.com */}
+                  info@nativedelightplus.com
                 </li>
               </ul>
             </div>

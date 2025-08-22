@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from 'react';
@@ -10,7 +9,16 @@ interface MenuItem {
   name: string;
   description: string;
   price: number;
-  category: { name: string; subcategory: string };
+  category: {
+    _id: string;
+    name: string;
+  };
+  subCategory: {
+    _id: string;
+    name: string;
+  };
+  status: string;
+  stock: string;
   image: string;
 }
 
@@ -142,13 +150,19 @@ const Cart: React.FC<CartProps> = ({
                       key={item._id}
                       className="flex items-center border-b border-gray-200 pb-4"
                     >
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        width={80}
-                        height={80}
-                        className="w-20 h-20 object-cover rounded-lg mr-4"
-                      />
+                      {item.image ? (
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          width={80}
+                          height={80}
+                          className="w-20 h-20 object-cover rounded-lg mr-4"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-amber-200 rounded-lg mr-4 flex items-center justify-center">
+                          <span className="text-amber-600 text-2xl">🍽️</span>
+                        </div>
+                      )}
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-800">{item.name}</h3>
                         <p className="text-gray-600 text-sm">N{item.price.toFixed(2)}</p>
@@ -212,7 +226,6 @@ const Cart: React.FC<CartProps> = ({
         </div>
       </div>
       {/* Payment Options Modal */}
-
 
       <div
         className={`fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity ${

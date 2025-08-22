@@ -9,6 +9,11 @@ interface Category {
   image: string;
   subcategoryCount: number;
   subcategories: any[];
+   success: boolean;
+  categories: Category[];
+  totalCategories?: number;
+  totalActiveCategories?: number;
+  mostOrderedCategory?: any;
 }
 
 interface MenuItem {
@@ -18,6 +23,15 @@ interface MenuItem {
   price: number;
   category: {name: string, subcategory: string}; // This should match category._id
   image: string;
+  success: boolean;
+  products: MenuItem[];
+  summary?: {
+    totalProducts: number;
+    totalActive: number;
+    totalInStock: number;
+    totalOutOfStock: number;
+  };
+
 }
 
 interface OrderItem {
