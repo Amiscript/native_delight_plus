@@ -157,12 +157,12 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
               <div>
                 <h4 className="font-bold text-gray-800 text-base md:text-lg mb-1 line-clamp-2">{item.name}</h4>
                 <p className="text-gray-600 text-xs md:text-sm mb-1 line-clamp-2">{item.description}</p>
-                <div className="flex items-center space-x-1 mb-1">
+                {/* <div className="flex items-center space-x-1 mb-1">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} size={12} className="text-amber-400 fill-current" />
                   ))}
                   <span className="text-gray-500 text-xs">(4.8)</span>
-                </div>
+                </div> */}
                 <p className="text-xs text-gray-500">
                   {item.subCategory?.name || 'No subcategory'}
                 </p>
