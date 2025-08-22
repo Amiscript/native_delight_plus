@@ -326,6 +326,7 @@ const Foodmenu: React.FC = () => {
       setIsCartOpen={setIsCartOpen}
       orderPlaced={orderPlaced}
       setOrderPlaced={setOrderPlaced}
+      onBackToCategory={handleBackToCategories}
       />
 
       {/* Category Modal */}

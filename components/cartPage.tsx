@@ -34,7 +34,7 @@ interface CartProps {
   setIsCartOpen: React.Dispatch<React.SetStateAction<boolean>>;
   orderPlaced: boolean;
   setOrderPlaced: React.Dispatch<React.SetStateAction<boolean>>;
-  
+   onBackToCategory: () => void;
 }
 
 const Cart: React.FC<CartProps> = ({
@@ -44,7 +44,7 @@ const Cart: React.FC<CartProps> = ({
   setIsCartOpen,
   orderPlaced,
   setOrderPlaced,
-
+  onBackToCategory 
 
 }) => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -52,6 +52,10 @@ const Cart: React.FC<CartProps> = ({
 
   const removeFromCart = (id: string) => {
     setCartItems(prevItems => prevItems.filter(item => item._id !== id));
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
   };
 
   const updateQuantity = (id: string, newQuantity: number) => {
@@ -122,7 +126,7 @@ const Cart: React.FC<CartProps> = ({
   // Function to handle back button click
   const handleBackButtonClick = () => {
     setIsCartOpen(false);
-   
+    onBackToCategory();
   };
 
   return (
@@ -199,7 +203,7 @@ const Cart: React.FC<CartProps> = ({
                         onClick={() => removeFromCart(item._id)}
                         className="!rounded-button whitespace-nowrap ml-4 text-red-500 hover:text-red-700 cursor-pointer"
                       >
-                        <i className="fas fa-trash"></i>
+                        <i className="fas fa-trash"> Remove</i>
                       </button>
                     </div>
                   ))}
@@ -214,22 +218,35 @@ const Cart: React.FC<CartProps> = ({
                     <span>N{getTotalPrice().toFixed(2)}</span>
                   </div>
                 </div>
-                <button
-                  onClick={handlePlaceOrder}
-                  className={`!rounded-button whitespace-nowrap w-full mt-6 py-3 rounded-lg font-medium text-white cursor-pointer ${
-                    orderPlaced ? 'bg-green-600' : 'bg-amber-600 hover:bg-amber-700'
-                  } transition-colors`}
-                  disabled={orderPlaced}
-                >
-                  {orderPlaced ? (
+                
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={clearCart}
+                    className="!rounded-button whitespace-nowrap flex-1 py-3 rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 cursor-pointer transition-colors"
+                  >
                     <div className="flex items-center justify-center">
-                      <i className="fas fa-check mr-2"></i>
-                      Order Placed!
+                      <i className="fas fa-times-circle mr-2"></i>
+                      Cancel Order
                     </div>
-                  ) : (
-                    'Place Order'
-                  )}
-                </button>
+                  </button>
+                  
+                  <button
+                    onClick={handlePlaceOrder}
+                    className={`!rounded-button whitespace-nowrap flex-1 py-3 rounded-lg font-medium text-white cursor-pointer ${
+                      orderPlaced ? 'bg-green-600' : 'bg-amber-600 hover:bg-amber-700'
+                    } transition-colors`}
+                    disabled={orderPlaced}
+                  >
+                    {orderPlaced ? (
+                      <div className="flex items-center justify-center">
+                        <i className="fas fa-check mr-2"></i>
+                        Order Placed!
+                      </div>
+                    ) : (
+                      'Place Order'
+                    )}
+                  </button>
+                </div>
               </>
             )}
 
