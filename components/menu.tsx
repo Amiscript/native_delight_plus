@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
-import { Plus, Star } from 'lucide-react';
+import { Plus, Star, Grid, List } from 'lucide-react';
 
 interface MenuItem {
   _id: string;
@@ -11,7 +11,7 @@ interface MenuItem {
     _id: string;
     name: string;
   };
-  subCategory: { // Changed from subCategory to subCategory to match API
+  subCategory: {
     _id: string;
     name: string;
   };
@@ -26,7 +26,10 @@ interface MenuProps {
 }
 
 const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
-  return (
+  const [viewMode, setViewMode] = useState<'card' | 'modal'>('card');
+
+  // Card View (Original)
+  const CardView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
       {filteredItems.map(item => (
         <div key={item._id} className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
@@ -107,6 +110,125 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
           </div>
         </div>
       ))}
+    </div>
+  );
+
+  // Modal Style View (New)
+  const ModalView = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {filteredItems.map(item => (
+        <div key={item._id} className="flex flex-col p-4 bg-white rounded-xl border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all duration-300 h-full">
+          <div className="flex items-start mb-3">
+            <div className="relative mr-3 flex-shrink-0">
+              {item.image ? (
+                <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden">
+                  <Image 
+                    src={item.image}
+                    alt={item.name}
+                    width={80}
+                    height={80}
+                    className="object-cover"
+                    unoptimized
+                  />
+                  {/* Status badge positioned at top-right of image */}
+                  <span className={`absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                    item.status === 'active' 
+                      ? 'bg-green-100 text-green-700' 
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {item.status === 'active' ? 'Available' : 'Unavailable'}
+                  </span>
+                </div>
+              ) : (
+                <div className="relative w-16 h-16 md:w-20 md:h-20 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <span className="text-amber-600 text-xl">🍽️</span>
+                  {/* Status badge positioned at top-right of placeholder */}
+                  <span className={`absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                    item.status === 'active' 
+                      ? 'bg-green-100 text-green-700' 
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {item.status === 'active' ? 'Available' : 'Unavailable'}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="flex-1 flex flex-col justify-between h-full">
+              <div>
+                <h4 className="font-bold text-gray-800 text-base md:text-lg mb-1 line-clamp-2">{item.name}</h4>
+                <p className="text-gray-600 text-xs md:text-sm mb-1 line-clamp-2">{item.description}</p>
+                <div className="flex items-center space-x-1 mb-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={12} className="text-amber-400 fill-current" />
+                  ))}
+                  <span className="text-gray-500 text-xs">(4.8)</span>
+                </div>
+                <p className="text-xs text-gray-500">
+                  {item.subCategory?.name || 'No subcategory'}
+                </p>
+              </div>
+              {/* Price moved to right side */}
+              <div className="flex justify-end mt-2">
+                <p className="text-amber-600 font-bold text-base md:text-lg">₦{item.price.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Stock status and add to cart button */}
+          <div className="flex items-center justify-between mt-auto">
+            <span className="text-xs px-2 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full font-medium">
+              {item.stock}
+            </span>
+            <button
+              onClick={() => addToCart(item)}
+              disabled={item.status !== 'active'}
+              className={`px-3 py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center space-x-1 ${
+                item.status === 'active'
+                  ? 'bg-amber-600 text-white hover:bg-amber-700 cursor-pointer'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              <Plus size={16} />
+              <span className="text-sm">{item.status === 'active' ? 'Add' : 'Unavailable'}</span>
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  return (
+    <div>
+      {/* View Toggle */}
+      <div className="flex justify-end mb-6">
+        <div className="bg-gray-100 rounded-lg p-1 flex">
+          <button
+            onClick={() => setViewMode('card')}
+            className={`flex items-center px-3 py-2 rounded-md transition-colors ${
+              viewMode === 'card' 
+                ? 'bg-white text-amber-600 shadow-sm' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <Grid size={18} className="mr-2" />
+            <span className="text-sm font-medium">List View</span>
+          </button>
+          <button
+            onClick={() => setViewMode('modal')}
+            className={`flex items-center px-3 py-2 rounded-md transition-colors ${
+              viewMode === 'modal' 
+                ? 'bg-white text-amber-600 shadow-sm' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <List size={18} className="mr-2" />
+            <span className="text-sm font-medium">Card View</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Render the selected view */}
+      {viewMode === 'card' ? <ModalView /> : <CardView />}
     </div>
   );
 };

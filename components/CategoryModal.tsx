@@ -154,7 +154,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                   }`}
                 >
                   <div className="flex flex-col items-center text-center">
-                    <Grid className="text-amber-600 size-5 md:size-6 mb-1" />
+                    {/* <Grid className="text-amber-600  md:size-6 mb-1" /> */}
                     <span className={`font-bold text-sm ${
                       expandedSubcategory === 'all'
                         ? 'text-amber-700'
@@ -162,9 +162,9 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                     }`}>
                       All Items
                     </span>
-                    <span className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded-full font-medium mt-2">
+                    {/* <span className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded-full font-medium mt-2">
                       {allCategoryItems.length} items
-                    </span>
+                    </span> */}
                   </div>
                 </button>
 
@@ -188,9 +188,9 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                         }`}>
                           {subcategory.name}
                         </span>
-                        <span className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded-full font-medium mt-2">
+                        {/* <span className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded-full font-medium mt-2">
                           {subcategory.items?.length || 0} items
-                        </span>
+                        </span> */}
                       </div>
                     </button>
                   ))
@@ -226,38 +226,52 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                     {allCategoryItems.map((item) => (
                       <div key={item._id} className="flex flex-col p-4 bg-white rounded-xl border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all duration-300 h-full">
                         <div className="flex items-start mb-3">
-                          {item.image ? (
-                            <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden mr-3 flex-shrink-0">
-                              <Image 
-                                src={item.image}
-                                alt={item.name}
-                                fill
-                                className="object-cover"
-                                unoptimized
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-16 h-16 md:w-20 md:h-20 bg-amber-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
-                              <Utensils size={20} className="text-amber-600" />
-                            </div>
-                          )}
-                          <div className="flex-1">
-                            <h4 className="font-bold text-gray-800 text-base md:text-lg mb-1 line-clamp-2">{item.name}</h4>
-                            <p className="text-gray-600 text-xs md:text-sm mb-1 line-clamp-2">{item.description}</p>
-                            <p className="text-xs text-gray-500">
-                              {item.subCategory?.name || 'No subcategory'}
-                            </p>
+                          <div className="relative mr-3 flex-shrink-0">
+                            {item.image ? (
+                              <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden">
+                                <Image 
+                                  src={item.image}
+                                  alt={item.name}
+                                  fill
+                                  className="object-cover"
+                                  unoptimized
+                                />
+                                {/* Status badge positioned at top-right of image */}
+                                <span className={`absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                                  item.status === 'active' 
+                                    ? 'bg-green-100 text-green-700' 
+                                    : 'bg-gray-100 text-gray-600'
+                                }`}>
+                                  {item.status === 'active' ? 'Available' : 'Unavailable'}
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="relative w-16 h-16 md:w-20 md:h-20 bg-amber-100 rounded-lg flex items-center justify-center">
+                                <Utensils size={20} className="text-amber-600" />
+                                {/* Status badge positioned at top-right of placeholder */}
+                                <span className={`absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                                  item.status === 'active' 
+                                    ? 'bg-green-100 text-green-700' 
+                                    : 'bg-gray-100 text-gray-600'
+                                }`}>
+                                  {item.status === 'active' ? 'Available' : 'Unavailable'}
+                                </span>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                        <div className="flex items-center justify-between mt-auto">
-                          <p className="text-amber-600 font-bold text-base md:text-lg">₦{item.price.toLocaleString()}</p>
-                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                            item.status === 'active' 
-                              ? 'bg-green-100 text-green-700' 
-                              : 'bg-gray-100 text-gray-600'
-                          }`}>
-                            {item.status === 'active' ? 'Available' : 'Unavailable'}
-                          </span>
+                          <div className="flex-1 flex flex-col justify-between h-full">
+                            <div>
+                              <h4 className="font-bold text-gray-800 text-base md:text-lg mb-1 line-clamp-2">{item.name}</h4>
+                              <p className="text-gray-600 text-xs md:text-sm mb-1 line-clamp-2">{item.description}</p>
+                              <p className="text-xs text-gray-500">
+                                {item.subCategory?.name || 'No subcategory'}
+                              </p>
+                            </div>
+                            {/* Price moved to right side */}
+                            <div className="flex justify-end mt-2">
+                              <p className="text-amber-600 font-bold text-base md:text-lg">₦{item.price.toLocaleString()}</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -300,35 +314,49 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                         {selectedSubcategory.items.map((item) => (
                           <div key={item._id} className="flex flex-col p-4 bg-white rounded-xl border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all duration-300 h-full">
                             <div className="flex items-start mb-3">
-                              {item.image ? (
-                                <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden mr-3 flex-shrink-0">
-                                  <Image 
-                                    src={item.image}
-                                    alt={item.name}
-                                    fill
-                                    className="object-cover"
-                                    unoptimized
-                                  />
-                                </div>
-                              ) : (
-                                <div className="w-16 h-16 md:w-20 md:h-20 bg-amber-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
-                                  <Utensils size={20} className="text-amber-600" />
-                                </div>
-                              )}
-                              <div className="flex-1">
-                                <h4 className="font-bold text-gray-800 text-base md:text-lg mb-1 line-clamp-2">{item.name}</h4>
-                                <p className="text-gray-600 text-xs md:text-sm line-clamp-2">{item.description}</p>
+                              <div className="relative mr-3 flex-shrink-0">
+                                {item.image ? (
+                                  <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden">
+                                    <Image 
+                                      src={item.image}
+                                      alt={item.name}
+                                      fill
+                                      className="object-cover"
+                                      unoptimized
+                                    />
+                                    {/* Status badge positioned at top-right of image */}
+                                    <span className={`absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                                      item.status === 'active' 
+                                        ? 'bg-green-100 text-green-700' 
+                                        : 'bg-gray-100 text-gray-600'
+                                    }`}>
+                                      {item.status === 'active' ? 'Available' : 'Unavailable'}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <div className="relative w-16 h-16 md:w-20 md:h-20 bg-amber-100 rounded-lg flex items-center justify-center">
+                                    <Utensils size={20} className="text-amber-600" />
+                                    {/* Status badge positioned at top-right of placeholder */}
+                                    <span className={`absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                                      item.status === 'active' 
+                                        ? 'bg-green-100 text-green-700' 
+                                        : 'bg-gray-100 text-gray-600'
+                                    }`}>
+                                      {item.status === 'active' ? 'Available' : 'Unavailable'}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                            <div className="flex items-center justify-between mt-auto">
-                              <p className="text-amber-600 font-bold text-base md:text-lg">₦{item.price.toLocaleString()}</p>
-                              <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                item.status === 'active' 
-                                  ? 'bg-green-100 text-green-700' 
-                                  : 'bg-gray-100 text-gray-600'
-                              }`}>
-                                {item.status === 'active' ? 'Available' : 'Unavailable'}
-                              </span>
+                              <div className="flex-1 flex flex-col justify-between h-full">
+                                <div>
+                                  <h4 className="font-bold text-gray-800 text-base md:text-lg mb-1 line-clamp-2">{item.name}</h4>
+                                  <p className="text-gray-600 text-xs md:text-sm line-clamp-2">{item.description}</p>
+                                </div>
+                                {/* Price moved to right side */}
+                                <div className="flex justify-end mt-2">
+                                  <p className="text-amber-600 font-bold text-base md:text-lg">₦{item.price.toLocaleString()}</p>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         ))}
