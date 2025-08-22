@@ -217,7 +217,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                     className="bg-amber-600 text-white px-4 md:px-6 py-2 rounded-lg font-medium hover:bg-amber-700 transition-colors flex items-center text-sm md:text-base"
                   >
                     <ArrowRight size={16} className="mr-1 md:mr-2" />
-                    Place Order
+                     Order Online
                   </button>
                 </div>
 
@@ -288,7 +288,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                     className="bg-amber-600 text-white px-4 md:px-6 py-2 rounded-lg font-medium hover:bg-amber-700 transition-colors flex items-center text-sm md:text-base"
                   >
                     <ArrowRight size={16} className="mr-1 md:mr-2" />
-                    Place Order
+                    Order Online
                   </button>
                 </div>
 
