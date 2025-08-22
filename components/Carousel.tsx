@@ -34,20 +34,20 @@ const images = [
 
 export default function CarouselPlugin() {
     const plugin = React.useRef(
-        Autoplay({ delay: 8000, stopOnInteraction: true })
+        Autoplay({ delay: 2000, stopOnInteraction: true })
     )
 
     return (
         <Carousel
             plugins={[plugin.current]}
-            className="w-full h-screen max-w-full"
+            className="w-full lg:h-[-300px] md:h-screen max-w-full"
             onMouseEnter={plugin.current.stop}
             onMouseLeave={plugin.current.reset}
         >
             <CarouselContent>
                 {images.map((img, index) => (
-                    <CarouselItem key={index} className="h-screen">
-                        <div className="relative w-full h-2/3">
+                    <CarouselItem key={index} className="h-screen ">
+                        <div className="relative w-full h-full">
                             <div
                                 className="absolute inset-0 bg-cover bg-center"
                                 style={{

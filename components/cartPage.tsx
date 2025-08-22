@@ -24,6 +24,7 @@ interface MenuItem {
 
 interface CartItem extends MenuItem {
   quantity: number;
+  
 }
 
 interface CartProps {
@@ -33,6 +34,7 @@ interface CartProps {
   setIsCartOpen: React.Dispatch<React.SetStateAction<boolean>>;
   orderPlaced: boolean;
   setOrderPlaced: React.Dispatch<React.SetStateAction<boolean>>;
+  
 }
 
 const Cart: React.FC<CartProps> = ({
@@ -42,6 +44,8 @@ const Cart: React.FC<CartProps> = ({
   setIsCartOpen,
   orderPlaced,
   setOrderPlaced,
+
+
 }) => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
@@ -113,6 +117,12 @@ const Cart: React.FC<CartProps> = ({
       console.error('Error processing payment:', error);
       setOrderPlaced(false);
     }
+  };
+
+  // Function to handle back button click
+  const handleBackButtonClick = () => {
+    setIsCartOpen(false);
+   
   };
 
   return (
@@ -222,6 +232,15 @@ const Cart: React.FC<CartProps> = ({
                 </button>
               </>
             )}
+
+            <button
+                type="button"
+                onClick={handleBackButtonClick}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors mt-4"
+                >
+                <i className="fas fa-arrow-left"></i>
+                <span>Back</span>
+                </button>
           </div>
         </div>
       </div>
@@ -258,6 +277,17 @@ const Cart: React.FC<CartProps> = ({
               <span>Pay with Paystack</span>
             </button>
           </div>
+          <button
+                type="button"
+                onClick={() => {
+                  setIsPaymentModalOpen(false);
+                  handleBackButtonClick();
+                }}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors mt-4"
+                >
+                <i className="fas fa-arrow-left"></i>
+                <span>Back</span>
+                </button>
         </div>
       </div>
       {/* Checkout Modal */}

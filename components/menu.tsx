@@ -43,7 +43,7 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
             
             {/* Price Badge */}
             <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
-              <span className="font-bold">₦{item.price.toFixed(2)}</span>
+              <span className="font-bold">₦{item.price.toLocaleString()}</span>
             </div>
             
             {/* Stock Status Badge */}
@@ -82,7 +82,7 @@ const Menu: React.FC<MenuProps> = ({ filteredItems, addToCart }) => {
             </p>
             
             <div className="flex items-center justify-between mb-4">
-              <span className="text-2xl font-bold text-amber-600">₦{item.price.toFixed(2)}</span>
+              <span className="text-2xl font-bold text-amber-600">₦{item.price.toLocaleString()}</span>
               <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                 item.status === 'active' 
                   ? 'bg-green-100 text-green-700' 

@@ -35,7 +35,7 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
   return (
     <div className="mb-8">
       <div className="mb-6">
-        <div className="text-center">
+        <div className="text-center mt-4">
           <h2 className="text-3xl font-bold text-gray-800 mb-3">Browse Our Categories</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Discover our variety of delicious food categories, each carefully curated with premium ingredients and authentic flavors
